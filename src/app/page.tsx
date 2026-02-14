@@ -526,11 +526,6 @@ export default function Home() {
   );
 }
 
-    }
-  }, [showReport, selectedOrgan, typewriterIndex]);
-
-  const speak = (text: string) => {
-    if ("speechSynthesis" in window) {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
       u.rate = 0.92;
