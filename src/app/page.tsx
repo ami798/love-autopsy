@@ -525,23 +525,6 @@ export default function Home() {
     </div>
   );
 }
-
-  // Thunder flash on heart pulse
-  useEffect(() => {
-    if (step === "lab") {
-      const interval = setInterval(() => {
-        if (Math.random() > 0.94) {
-          setShowThunderFlash(true);
-          setTimeout(() => setShowThunderFlash(false), 120);
-        }
-      }, 2800);
-      return () => clearInterval(interval);
-    }
-  }, [step]);
-
-  // Typewriter effect for report
-  useEffect(() => {
-    if (!showReport || !selectedOrgan) return;
     
     const text = selectedOrgan.report;
     if (typewriterIndex < text.length) {
