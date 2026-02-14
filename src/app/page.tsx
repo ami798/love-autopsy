@@ -525,9 +525,6 @@ export default function Home() {
     </div>
   );
 }
-    
-    const text = selectedOrgan.report;
-    if (typewriterIndex < text.length) {
       const timer = setTimeout(() => setTypewriterIndex(prev => prev + 1), 25);
       return () => clearTimeout(timer);
     }
