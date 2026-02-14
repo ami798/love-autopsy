@@ -525,14 +525,7 @@ export default function Home() {
     </div>
   );
 }
-      u.rate = 0.92;
-      u.pitch = 0.78;
-      window.speechSynthesis.speak(u);
-    }
-  };
 
-  const handleOrganClick = (organ: Organ) => {
-    if (collected.includes(organ.id)) return;
     setSelectedOrgan(organ);
     setShowReport(true);
     setTypewriterIndex(0);
