@@ -525,8 +525,7 @@ export default function Home() {
     </div>
   );
 }
-      const timer = setTimeout(() => setTypewriterIndex(prev => prev + 1), 25);
-      return () => clearTimeout(timer);
+
     }
   }, [showReport, selectedOrgan, typewriterIndex]);
 
