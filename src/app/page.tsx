@@ -525,9 +525,6 @@ export default function Home() {
     </div>
   );
 }
-
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
       u.rate = 0.92;
       u.pitch = 0.78;
       window.speechSynthesis.speak(u);
