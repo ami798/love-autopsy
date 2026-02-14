@@ -18,6 +18,27 @@ body {
   text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 40px #00ffff;
 }
 
+/* Corkboard texture */
+.bg-corkboard {
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      rgba(139, 90, 43, 0.1) 0px,
+      rgba(139, 90, 43, 0.1) 2px,
+      transparent 2px,
+      transparent 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(139, 90, 43, 0.05) 0px,
+      rgba(139, 90, 43, 0.05) 2px,
+      transparent 2px,
+      transparent 4px
+    ),
+    linear-gradient(135deg, #8b5a2b 0%, #a0653f 25%, #8b5a2b 50%, #9d6c3f 75%, #8b5a2b 100%);
+  background-size: 100% 100%, 100% 100%, 100% 100%;
+}
+
 /* Police tape */
 .police-tape {
   background: repeating-linear-gradient(45deg, #facc15, #facc15 30px, #111 30px, #111 60px);
@@ -40,3 +61,60 @@ body {
   20%, 24%, 55% { opacity: 0.4; }
 }
 .flicker { animation: flicker 8s infinite; }
+
+/* Typewriter cursor blink */
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* Red string animation (connecting organs to evidence) */
+@keyframes stringDraw {
+  from {
+    stroke-dashoffset: 1000;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.string-line {
+  animation: stringDraw 0.8s ease-out forwards;
+  stroke-dasharray: 1000;
+}
+
+/* Thunder flash - used with the white overlay */
+@keyframes thunderFlash {
+  0% { opacity: 0; }
+  50% { opacity: 0.4; }
+  100% { opacity: 0; }
+}
+
+/* Polaroid tilt entrance */
+@keyframes polaroidTilt {
+  from {
+    transform: rotateZ(-3deg) scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: rotateZ(0deg) scale(1);
+    opacity: 1;
+  }
+}
+.polaroid-enter {
+  animation: polaroidTilt 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Push pin drop animation */
+@keyframes pinDrop {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.pin-drop {
+  animation: pinDrop 0.4s ease-out;
+}
