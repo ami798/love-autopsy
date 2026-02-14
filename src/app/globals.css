@@ -1,26 +1,42 @@
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #0a0a0a;
+  color: #f3e8ff;
+  margin: 0;
+  overflow: hidden;
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="%23ff00ff" stroke-width="3"/></svg>') 12 12, auto;
 }
+
+/* Neon glows */
+.neon-pink {
+  text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 40px #ff00ff;
+}
+.neon-cyan {
+  text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 40px #00ffff;
+}
+
+/* Police tape */
+.police-tape {
+  background: repeating-linear-gradient(45deg, #facc15, #facc15 30px, #111 30px, #111 60px);
+  box-shadow: 0 0 20px rgba(0,0,0,0.9);
+}
+
+/* Morgue spotlight (mouse follow) */
+.spotlight {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle 180px at var(--x) var(--y), transparent 30%, rgba(0,0,0,0.97) 50%);
+  z-index: 40;
+  transition: background 0.05s;
+}
+
+/* Flicker animation */
+@keyframes flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+  20%, 24%, 55% { opacity: 0.4; }
+}
+.flicker { animation: flicker 8s infinite; }
