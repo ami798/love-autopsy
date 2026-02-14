@@ -4,7 +4,527 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import html2canvas from "html2canvas";
-import { Skull, FileText, Share2, Play, Download } from "lucide-react";
+import { Skull, Share2, Download, X } from "lucide-react";
+
+// Organ data with better descriptive reports
+const ORGANS = [
+  {
+    id: "delulu",
+    name: "Delulu Ventricle",
+    emoji: "💭",
+    report:
+      "Severely enlarged from 47 instances of 'he's just busy'. The patient believed a blue-tick wait meant true love was brewing. Critical failure: chronically inflated hope.",
+  },
+  {
+    id: "ghost",
+    name: "Ghosting Aorta",
+    emoji: "👻",
+    report:
+      "Completely blocked since February 2025. Last blood flow detected: one (1) 'Hey'. Habesha ghosting at its finest—even his mother knows more than you do.",
+  },
+  {
+    id: "injera",
+    name: "Injera Intestines",
+    emoji: "🍞",
+    report:
+      "Tied in knots after the legendary 3-hour 'who eats the last piece' war. His mother took his side. The intestines never recovered from the betrayal.",
+  },
+  {
+    id: "overthink",
+    name: "Overthinker Sinus",
+    emoji: "🧠",
+    report:
+      "Replayed one 'k' message 92 times at 3 AM. Also deep-dived his ex's Instagram, checked his LinkedIn activity, and analyzed his Spotify playlists. Critical inflammation.",
+  },
+  {
+    id: "redflag",
+    name: "Red-Flag Coronary",
+    emoji: "🚩",
+    report:
+      "Toxic accumulation of 'he has potential' beliefs. You saw the flags. They were redder than your outfit at Timkat. You simply chose to ignore them.",
+  },
+  {
+    id: "cringe",
+    name: "Cringe Pericardium",
+    emoji: "😬",
+    report:
+      "You said 'you too' when he said 'I love you'. In front of his entire family. During a family dinner. The pericardium is permanently scarred.",
+  },
+  {
+    id: "habesha",
+    name: "Habesha Hope Vein",
+    emoji: "🤞",
+    report:
+      "Still believing 'next year he will change'. Your mama was betting against you. Your sisters were shaking their heads. Chronic, delusional optimism.",
+  },
+  {
+    id: "moths",
+    name: "Butterfly-Moths Atrium",
+    emoji: "🦋",
+    report:
+      "Butterflies died long ago. Now only anxiety moths inhabit this chamber—they arrive at 2 AM and never leave. The atrium is their permanent residence.",
+  },
+];
+
+const SECRET_ORGAN = {
+  id: "amira",
+  name: "Amira's Secret Heart",
+  emoji: "💝",
+  report:
+    "Reserved for those who pay attention. You found the secret. This heart knows your pain isn't permanent. Maybe he wasn't worth saving after all.",
+};
+
+export default function Home() {
+  const [step, setStep] = useState<"intro" | "form" | "lab" | "complete">(
+    "intro"
+  );
+  const [collected, setCollected] = useState<string[]>([]);
+  const [selectedOrgan, setSelectedOrgan] = useState<any>(null);
+  const [showReport, setShowReport] = useState(false);
+  const [answers, setAnswers] = useState(["", "", ""]);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [showSecret, setShowSecret] = useState(false);
+  const [thunder, setThunder] = useState(false);
+  const reportRef = useRef<HTMLDivElement>(null);
+
+  const organs = [...ORGANS, ...(showSecret ? [SECRET_ORGAN] : [])];
+
+  // Mouse tracking
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  // Easter egg: type "amira"
+  useEffect(() => {
+    let buffer = "";
+    const handleKeyDown = (e: KeyboardEvent) => {
+      buffer += e.key.toLowerCase();
+      if (buffer.endsWith("amira")) {
+        setShowSecret(true);
+        speak(
+          "You found the secret. This heart was meant for someone who listens."
+        );
+      }
+      if (buffer.length > 8) buffer = buffer.slice(-8);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Thunder flash during lab
+  useEffect(() => {
+    if (step === "lab") {
+      const interval = setInterval(() => {
+        if (Math.random() < 0.08) {
+          setThunder(true);
+          setTimeout(() => setThunder(false), 180);
+        }
+      }, 1200);
+      return () => clearInterval(interval);
+    }
+  }, [step]);
+
+  const speak = (text: string) => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 0.92;
+      u.pitch = 0.78;
+      window.speechSynthesis.speak(u);
+    }
+  };
+
+  const handleOrganClick = (organ: any) => {
+    if (collected.includes(organ.id)) return;
+    setSelectedOrgan(organ);
+    setShowReport(true);
+    speak(organ.report);
+    setCollected((prev) => [...prev, organ.id]);
+  };
+
+  const completeAutopsy = () => {
+    setStep("complete");
+    confetti({
+      particleCount: 400,
+      spread: 100,
+      origin: { y: 0.6 },
+      colors: ["#dc2626", "#b91c1c"],
+    });
+    speak("Case closed. Romance is officially dead.");
+  };
+
+  const downloadReport = async () => {
+    if (!reportRef.current) return;
+    try {
+      const canvas = await html2canvas(reportRef.current, {
+        backgroundColor: "#1a1a1a",
+        scale: 2,
+      });
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL();
+      link.download = `autopsy-${selectedOrgan.id}.png`;
+      link.click();
+    } catch (err) {
+      console.error("[v0] Download failed:", err);
+    }
+  };
+
+  const share = () => {
+    const text = `Dr. Amira just autopsied my love life 💀\nFailed organs: ${collected.length}/${organs.length}\n${window.location.href}`;
+    navigator.clipboard.writeText(text);
+    alert("Copied to clipboard! Share with your group chat");
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0f0f0f] text-[#e5e5e5] overflow-hidden">
+      {/* Thunder Flash */}
+      {thunder && <div className="thunder-flash" />}
+
+      {/* Morgue Spotlight */}
+      <div
+        className="morgue-spotlight"
+        style={{
+          "--x": `${mousePos.x}px`,
+          "--y": `${mousePos.y}px`,
+        } as any}
+      />
+
+      {/* Police Tape Top */}
+      <div className="fixed top-0 left-0 right-0 h-8 -rotate-3 z-50 flex items-center justify-center police-tape flicker text-black text-xs md:text-sm font-bold">
+        POLICE LINE — DO NOT CROSS — LOVE CRIME SCENE
+      </div>
+
+      {/* Police Tape Bottom */}
+      <div className="fixed bottom-0 left-0 right-0 h-8 rotate-3 z-50 flex items-center justify-center police-tape flicker text-black text-xs md:text-sm font-bold">
+        POLICE LINE — DO NOT CROSS — LOVE CRIME SCENE
+      </div>
+
+      {/* INTRO SCREEN */}
+      {step === "intro" && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="h-screen flex flex-col items-center justify-center text-center px-4"
+        >
+          <div className="text-8xl mb-8">💀</div>
+          <h1 className="text-6xl md:text-7xl font-bold tracking-tight mb-2 neon-text">
+            DR. AMIRA'S
+          </h1>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-8 text-[#a0a0a0]">
+            LOVE AUTOPSY LAB
+          </h2>
+          <p className="text-sm md:text-base text-[#a0a0a0] mb-2 font-mono tracking-widest">
+            CASE #VDAYMURDER2026
+          </p>
+          <p className="text-base md:text-lg text-[#808080] mb-12 max-w-md leading-relaxed">
+            Your situationship didn't survive. Let's figure out which organs failed.
+          </p>
+          <motion.button
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setStep("form")}
+            className="btn-primary text-base md:text-lg px-8 py-3"
+          >
+            Enter the Lab →
+          </motion.button>
+          {showSecret && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-12 text-sm text-[#ec4899] font-mono"
+            >
+              SECRET UNLOCKED
+            </motion.p>
+          )}
+        </motion.div>
+      )}
+
+      {/* FORM SCREEN */}
+      {step === "form" && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="min-h-screen flex items-center justify-center px-4 py-20"
+        >
+          <div className="max-w-2xl w-full">
+            <div className="mb-12">
+              <h1 className="text-4xl md:text-5xl font-bold mb-3">Victim Statement</h1>
+              <p className="text-[#a0a0a0]">
+                Tell us about the crime. Complete honesty required.
+              </p>
+            </div>
+
+            <div className="space-y-8">
+              {[
+                "How did it die? (ghosted, fought, said 'k', etc.)",
+                "Last words from the suspect?",
+                "One red flag you ignored?",
+              ].map((question, i) => (
+                <div key={i}>
+                  <label className="block text-sm font-mono text-[#a0a0a0] mb-3">
+                    {question}
+                  </label>
+                  <input
+                    type="text"
+                    value={answers[i]}
+                    onChange={(e) => {
+                      const newAns = [...answers];
+                      newAns[i] = e.target.value;
+                      setAnswers(newAns);
+                    }}
+                    placeholder="Type here..."
+                    className="w-full"
+                  />
+                </div>
+              ))}
+
+              <button
+                onClick={() => setStep("lab")}
+                disabled={answers.some((a) => a.trim().length < 3)}
+                className="btn-primary w-full mt-12 text-base md:text-lg py-3"
+              >
+                Take me to the body →
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* LAB SCREEN */}
+      {step === "lab" && (
+        <div className="relative min-h-screen flex flex-col md:flex-row items-center justify-between px-6 md:px-12 py-20 gap-12">
+          {/* Grid background */}
+          <div className="absolute inset-0 bg-[radial-gradient(#333_1px,transparent_1px)] bg-[length:40px_40px] opacity-20 pointer-events-none" />
+
+          {/* Heart */}
+          <div className="relative w-full md:w-1/2 flex items-center justify-center">
+            <motion.div
+              animate={{ scale: [1, 1.04, 1] }}
+              transition={{ duration: 2.8, repeat: Infinity }}
+              className="w-64 h-64 md:w-72 md:h-72 pulse-heart"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="w-full h-full text-[#dc2626] drop-shadow-[0_0_40px_#dc2626]"
+              >
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+            </motion.div>
+          </div>
+
+          {/* Organs Grid */}
+          <div className="relative w-full md:w-1/2 z-10">
+            <h3 className="text-2xl md:text-3xl font-bold mb-8">Collect Evidence</h3>
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              {organs.map((organ) => (
+                <motion.button
+                  key={organ.id}
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleOrganClick(organ)}
+                  disabled={collected.includes(organ.id)}
+                  className={`card-crime-scene text-center ${
+                    collected.includes(organ.id)
+                      ? "opacity-50 cursor-not-allowed"
+                      : "cursor-pointer"
+                  }`}
+                >
+                  <div className="text-4xl md:text-5xl mb-3">{organ.emoji}</div>
+                  <div className="text-xs md:text-sm font-mono font-bold tracking-wide line-clamp-1">
+                    {organ.name.split(" ")[0]}
+                  </div>
+                  {collected.includes(organ.id) && (
+                    <div className="text-xs text-[#80c080] mt-2">✓ Collected</div>
+                  )}
+                </motion.button>
+              ))}
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mb-8 p-4 card-crime-scene">
+              <p className="text-xs text-[#a0a0a0] mb-2 font-mono">
+                EVIDENCE COLLECTED
+              </p>
+              <div className="w-full bg-[#262626] rounded-full h-2">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{
+                    width: `${(collected.length / organs.length) * 100}%`,
+                  }}
+                  className="bg-[#dc2626] h-2 rounded-full"
+                />
+              </div>
+              <p className="text-xs text-[#a0a0a0] mt-2 font-mono">
+                {collected.length}/{organs.length} organs
+              </p>
+            </div>
+
+            {/* Complete button */}
+            {collected.length >= (showSecret ? 7 : 6) && (
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                onClick={completeAutopsy}
+                className="btn-primary w-full text-base md:text-lg py-3"
+              >
+                Complete Autopsy →
+              </motion.button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* REPORT MODAL */}
+      <AnimatePresence>
+        {showReport && selectedOrgan && (
+          <div
+            className="modal-overlay"
+            onClick={() => setShowReport(false)}
+          >
+            <motion.div
+              ref={reportRef}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="modal-content max-w-lg w-full mx-4 relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setShowReport(false)}
+                className="absolute top-4 right-4 p-2 hover:bg-[#262626] rounded-lg transition-all z-10"
+              >
+                <X size={20} />
+              </button>
+
+              {/* Polaroid Header */}
+              <div className="bg-white p-6 text-center">
+                <div className="text-5xl mb-3">{selectedOrgan.emoji}</div>
+                <h3 className="text-xl font-bold text-black">
+                  {selectedOrgan.name}
+                </h3>
+                <p className="text-xs text-[#666] font-mono mt-2">
+                  {new Date().toLocaleDateString()}
+                </p>
+              </div>
+
+              {/* Report Header */}
+              <div className="bg-[#dc2626] px-6 py-4 flex items-center gap-3">
+                <Skull size={24} />
+                <span className="font-bold text-lg">Forensic Report</span>
+              </div>
+
+              {/* Report Content */}
+              <div className="p-8 bg-[#1a1a1a] min-h-48">
+                <p className="text-base md:text-lg leading-relaxed text-[#e5e5e5]">
+                  {selectedOrgan.report}
+                </p>
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-4 bg-[#262626] border-t border-[#333] flex items-center justify-between gap-4">
+                <p className="text-xs text-[#808080] font-mono">
+                  Voice active • Close to dismiss
+                </p>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    downloadReport();
+                  }}
+                  className="btn-secondary text-sm flex items-center gap-2 py-2 px-3"
+                >
+                  <Download size={16} />
+                  Save
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* COMPLETE SCREEN */}
+      {step === "complete" && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="min-h-screen flex flex-col items-center justify-center text-center px-4 py-20"
+        >
+          <div className="text-7xl md:text-8xl mb-8">💀</div>
+          <h1 className="text-5xl md:text-6xl font-bold mb-4 neon-text">
+            Case Closed
+          </h1>
+          <p className="text-base md:text-lg text-[#a0a0a0] mb-12 font-mono">
+            Romance pronounced dead • {new Date().toLocaleDateString()}
+          </p>
+
+          {/* Evidence Board */}
+          <div className="max-w-2xl w-full evidence-board texture-cork p-8 rounded-lg mb-12">
+            <div className="pin" style={{ top: "-10px", left: "20%" }} />
+            <div className="pin" style={{ top: "-10px", right: "20%" }} />
+
+            <div className="mb-8">
+              <h3 className="text-lg font-bold text-black mb-1">
+                Evidence Collected
+              </h3>
+              <p className="text-sm text-[#333] font-mono">
+                {collected.length} of {organs.length} organs analyzed
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              {collected.map((id) => {
+                const organ = organs.find((o) => o.id === id);
+                return (
+                  <div key={id} className="bg-white/30 p-4 rounded">
+                    <div className="text-3xl mb-2">{organ?.emoji}</div>
+                    <p className="text-xs font-bold text-black line-clamp-2">
+                      {organ?.name}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+
+            <p className="text-xs text-[#333] italic font-mono">
+              Dr. Amira's Investigation Report • Case #{new Date().getFullYear()}
+            </p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col md:flex-row gap-4">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              onClick={share}
+              className="btn-primary flex items-center justify-center gap-2 px-6 py-3"
+            >
+              <Share2 size={18} />
+              Share Results
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              onClick={() => {
+                setStep("intro");
+                setCollected([]);
+                setAnswers(["", "", ""]);
+              }}
+              className="btn-secondary flex items-center justify-center gap-2 px-6 py-3"
+            >
+              Start New Case
+            </motion.button>
+          </div>
+
+          <p className="text-xs text-[#666] mt-12 font-mono">
+            Made by @amiprin7 • Valentine's 2026
+          </p>
+        </motion.div>
+      )}
+    </div>
+  );
+}
 
 interface Organ {
   id: number;
